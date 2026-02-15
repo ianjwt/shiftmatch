@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShiftMatch — Find the shift that's meant to be</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Fredoka+One&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ================================================================
+           DESIGN SYSTEM — Dark romantic, glassmorphism
+           ================================================================ */
+        :root {
+            --pink: #FF6B9D;
+            --coral: #C44569;
+            --gradient-pink: linear-gradient(135deg, #FF6B9D 0%, #C44569 100%);
+            --gradient-bg: linear-gradient(135deg, #1a0533 0%, #4A148C 30%, #6A1B9A 60%, #311B92 100%);
+            --glass-bg: rgba(106, 27, 154, 0.3);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --card-hover-shadow: 0 16px 48px rgba(255, 107, 157, 0.2);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-muted: rgba(255, 255, 255, 0.4);
+            --radius: 20px;
+            --radius-sm: 12px;
+            --radius-pill: 50px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--gradient-bg);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ================================================================
+           HEADER
+           ================================================================ */
+        .header {
+            background: rgba(26, 5, 51, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 28px 32px 24px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .header-emojis {
+            font-size: 28px;
+            letter-spacing: 10px;
+            margin-bottom: 8px;
+        }
+        .header h1 {
+            font-family: 'Fredoka One', 'DM Serif Display', serif;
+            font-size: 2.6rem;
+            font-weight: 400;
+            letter-spacing: 1px;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .header h1 .match-text {
+            background: var(--gradient-pink);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header .tagline {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-top: 6px;
+            font-weight: 400;
+            font-style: italic;
+        }
+
+        /* ================================================================
+           LAYOUT
+           ================================================================ */
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 28px 20px 80px;
+        }
+
+        /* ================================================================
+           PROFILE SETUP SCREEN
+           ================================================================ */
+        #profile-screen {}
+
+        .section-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: var(--radius);
+            box-shadow: var(--glass-shadow);
+            border: 1px solid var(--glass-border);
+            padding: 28px 24px;
+            margin-bottom: 20px;
+        }
+        .section-card h2 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.25rem;
+            font-weight: 400;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+        .section-card .subtitle {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 18px;
+        }
+
+        /* Pill buttons for days/times */
+        .pill-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .pill-group input[type="checkbox"] { display: none; }
+        .pill-group label {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 22px;
+            border-radius: var(--radius-pill);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            user-select: none;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .pill-group label:hover {
+            border-color: var(--pink);
+            color: var(--pink);
+            background: rgba(255, 107, 157, 0.1);
+        }
+        .pill-group input:checked + label {
+            background: var(--gradient-pink);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 4px 20px rgba(255, 107, 157, 0.4);
+        }
+
+        /* Draggable committee ranking */
+        .rank-list {
+            list-style: none;
+            counter-reset: rank;
+        }
+        .rank-item {
+            counter-increment: rank;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            margin-bottom: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: grab;
+            transition: all 0.2s;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+        .rank-item:active { cursor: grabbing; }
+        .rank-item.dragging {
+            opacity: 0.5;
+            border-color: var(--pink);
+            background: rgba(255, 107, 157, 0.1);
+        }
+        .rank-item .rank-number {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: var(--gradient-pink);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .rank-item .rank-number::before { content: counter(rank); }
+        .rank-item .drag-handle {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+
+        /* Email opt-in */
+        .email-optin {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        .email-optin input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--pink);
+            cursor: pointer;
+        }
+        .email-optin label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+        .email-field {
+            display: none;
+            margin-top: 8px;
+        }
+        .email-field.show { display: block; }
+        .email-field input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 0.95rem;
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            transition: border-color 0.2s;
+        }
+        .email-field input::placeholder { color: var(--text-muted); }
+        .email-field input:focus {
+            outline: none;
+            border-color: var(--pink);
+            box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.2);
+        }
+
+        /* Primary CTA */
+        .btn-primary {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            background: var(--gradient-pink);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius);
+            font-family: inherit;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 6px 28px rgba(255, 107, 157, 0.4);
+            letter-spacing: 0.3px;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(255, 107, 157, 0.55);
+        }
+        .btn-primary:active { transform: translateY(0); }
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ================================================================
+           LOGIN MODAL
+           ================================================================ */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal-overlay.show {
+            display: flex;
+        }
+        .modal {
+            background: rgba(26, 5, 51, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            padding: 36px 32px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+        .modal h2 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.4rem;
+            font-weight: 400;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+        }
+        .modal .modal-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+        .modal label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+        .modal input[type="text"],
+        .modal input[type="password"] {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 1rem;
+            margin-bottom: 16px;
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            transition: border-color 0.2s;
+        }
+        .modal input::placeholder { color: var(--text-muted); }
+        .modal input:focus {
+            outline: none;
+            border-color: var(--pink);
+            box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.2);
+        }
+        .modal .btn-primary { margin-top: 8px; }
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 18px;
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            line-height: 1;
+        }
+        .modal-close:hover { color: var(--text-secondary); }
+        .modal-error {
+            display: none;
+            background: rgba(192, 57, 43, 0.2);
+            border: 1px solid rgba(255, 107, 157, 0.3);
+            color: #ff9eb5;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+        }
+        .modal-error.show { display: block; }
+        .fine-print {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 16px;
+            line-height: 1.6;
+        }
+
+        /* ================================================================
+           MATCHES SCREEN
+           ================================================================ */
+        #matches-screen { display: none; }
+
+        .filter-bar {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: var(--radius);
+            box-shadow: var(--glass-shadow);
+            border: 1px solid var(--glass-border);
+            padding: 18px 22px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+        }
+        .filter-bar .filter-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+        .filter-chip {
+            display: inline-block;
+            padding: 5px 14px;
+            background: rgba(255, 107, 157, 0.15);
+            color: var(--pink);
+            border-radius: var(--radius-pill);
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid rgba(255, 107, 157, 0.25);
+        }
+        .filter-bar .bar-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 10px;
+        }
+        .btn-outline {
+            padding: 10px 20px;
+            border: 2px solid var(--pink);
+            background: transparent;
+            color: var(--pink);
+            border-radius: var(--radius-pill);
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-outline:hover {
+            background: var(--pink);
+            color: #fff;
+        }
+        .btn-fire {
+            padding: 10px 20px;
+            background: var(--gradient-pink);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-pill);
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 16px rgba(255, 107, 157, 0.35);
+        }
+        .btn-fire:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 24px rgba(255, 107, 157, 0.5);
+        }
+
+        .results-status {
+            text-align: center;
+            padding: 12px;
+            margin-bottom: 16px;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        /* Shift Card Grid */
+        .shift-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+            padding-top: 12px;
+        }
+        .shift-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: var(--radius);
+            box-shadow: var(--glass-shadow);
+            border: 1px solid var(--glass-border);
+            padding: 32px 22px 24px;
+            cursor: pointer;
+            transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+            position: relative;
+            overflow: visible;
+        }
+        .shift-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--card-hover-shadow);
+            border-color: rgba(255, 107, 157, 0.3);
+        }
+        .shift-card.top-match {
+            border-color: rgba(255, 107, 157, 0.3);
+            box-shadow: 0 4px 24px rgba(255, 107, 157, 0.15);
+        }
+
+        /* Score badge */
+        .score-badge {
+            position: absolute;
+            top: -10px;
+            right: 16px;
+            padding: 5px 14px;
+            border-radius: var(--radius-pill);
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #fff;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.25);
+        }
+        .score-fire { background: linear-gradient(135deg, #FF6B9D, #C44569); }
+        .score-purple { background: linear-gradient(135deg, #a29bfe, #6c5ce7); }
+        .score-star { background: linear-gradient(135deg, #636e72, #4a545a); }
+
+        .shift-card .card-committee {
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+        .shift-card .card-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .card-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-pill);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .shift-card .card-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .shift-card .btn-details {
+            display: inline-block;
+            padding: 8px 18px;
+            background: rgba(255, 107, 157, 0.15);
+            color: var(--pink);
+            border: 1px solid rgba(255, 107, 157, 0.25);
+            border-radius: var(--radius-pill);
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .shift-card .btn-details:hover {
+            background: rgba(255, 107, 157, 0.25);
+        }
+
+        /* Load More button */
+        .load-more-container {
+            text-align: center;
+            margin-top: 28px;
+        }
+        .btn-load-more {
+            padding: 14px 36px;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: var(--radius-pill);
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-load-more:hover {
+            background: rgba(255, 107, 157, 0.15);
+            color: var(--pink);
+            border-color: rgba(255, 107, 157, 0.3);
+        }
+
+        /* ================================================================
+           DETAIL MODAL
+           ================================================================ */
+        .detail-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 300;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .detail-modal.show { display: flex; }
+        .detail-content {
+            background: rgba(26, 5, 51, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            padding: 36px 32px;
+            max-width: 520px;
+            width: 100%;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .detail-content .detail-close {
+            position: absolute;
+            top: 16px;
+            right: 18px;
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+        .detail-content .detail-close:hover { color: var(--text-secondary); }
+        .detail-content .detail-score {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: var(--radius-pill);
+            font-weight: 700;
+            font-size: 1rem;
+            color: #fff;
+            margin-bottom: 16px;
+        }
+        .detail-content h3 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.5rem;
+            font-weight: 400;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+        }
+        .detail-content .detail-time {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+        .detail-content .detail-desc {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: var(--text-primary);
+            margin-bottom: 24px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .breakdown-title {
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+        .breakdown-list {
+            list-style: none;
+            margin-bottom: 24px;
+        }
+        .breakdown-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .breakdown-list li .bd-icon { font-size: 1rem; }
+        .btn-claim {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background: var(--gradient-pink);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius);
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 6px 28px rgba(255, 107, 157, 0.35);
+        }
+        .btn-claim:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(255, 107, 157, 0.5);
+        }
+
+        /* ================================================================
+           TOP 5 MODAL
+           ================================================================ */
+        .top5-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 250;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .top5-modal.show { display: flex; }
+        .top5-content {
+            background: rgba(26, 5, 51, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            padding: 36px 32px;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .top5-content h2 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.4rem;
+            font-weight: 400;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+        .top5-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .top5-item:last-child { border-bottom: none; }
+        .top5-rank {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--gradient-pink);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+        .top5-info { flex: 1; }
+        .top5-info .t5-committee { font-weight: 700; font-size: 0.95rem; color: var(--text-primary); }
+        .top5-info .t5-when {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+        .top5-score {
+            font-weight: 700;
+            font-size: 0.95rem;
+            padding: 4px 12px;
+            border-radius: var(--radius-pill);
+        }
+
+        /* ================================================================
+           LOADING SPINNER
+           ================================================================ */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(26, 5, 51, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 500;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .loading-overlay.show { display: flex; }
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--pink);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: var(--text-primary);
+        }
+        .loading-sub {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* ================================================================
+           RESPONSIVE
+           ================================================================ */
+        @media (max-width: 600px) {
+            .header { padding: 20px 16px 16px; }
+            .header h1 { font-size: 1.8rem; }
+            .container { padding: 16px 12px 60px; }
+            .section-card { padding: 22px 18px; }
+            .shift-grid { grid-template-columns: 1fr; }
+            .filter-bar { flex-direction: column; align-items: flex-start; }
+            .filter-bar .bar-actions { margin-left: 0; width: 100%; }
+            .filter-bar .bar-actions button { flex: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================================
+         HEADER
+         ============================================================ -->
+    <div class="header">
+        <div class="header-emojis">&#x1FAD3;&#x1FAD8;&#x1F9C0;&#x1F34C;</div>
+        <h1>Shift<span class="match-text">Match</span></h1>
+        <div class="tagline">Find the shift that's meant to be</div>
+    </div>
+
+    <!-- ============================================================
+         LOADING OVERLAY
+         ============================================================ -->
+    <div class="loading-overlay" id="loading">
+        <div class="spinner"></div>
+        <div class="loading-text">Finding your perfect shifts...</div>
+        <div class="loading-sub">Logging in and scanning available shifts</div>
+    </div>
+
+    <!-- ============================================================
+         PROFILE SETUP SCREEN
+         ============================================================ -->
+    <div class="container" id="profile-screen">
+
+        <!-- Days -->
+        <div class="section-card">
+            <h2>Days Available</h2>
+            <p class="subtitle">Which days work for you?</p>
+            <div class="pill-group" id="day-pills">
+                <input type="checkbox" id="day-mon" value="Monday"><label for="day-mon">Mon</label>
+                <input type="checkbox" id="day-tue" value="Tuesday"><label for="day-tue">Tue</label>
+                <input type="checkbox" id="day-wed" value="Wednesday"><label for="day-wed">Wed</label>
+                <input type="checkbox" id="day-thu" value="Thursday"><label for="day-thu">Thu</label>
+                <input type="checkbox" id="day-fri" value="Friday"><label for="day-fri">Fri</label>
+                <input type="checkbox" id="day-sat" value="Saturday"><label for="day-sat">Sat</label>
+                <input type="checkbox" id="day-sun" value="Sunday"><label for="day-sun">Sun</label>
+            </div>
+        </div>
+
+        <!-- Times -->
+        <div class="section-card">
+            <h2>Time Slots</h2>
+            <p class="subtitle">When are you free?</p>
+            <div class="pill-group" id="time-pills">
+                <input type="checkbox" id="time-morning" value="Morning"><label for="time-morning">Morning</label>
+                <input type="checkbox" id="time-afternoon" value="Afternoon"><label for="time-afternoon">Afternoon</label>
+                <input type="checkbox" id="time-evening" value="Evening"><label for="time-evening">Evening</label>
+                <input type="checkbox" id="time-overnight" value="Overnight"><label for="time-overnight">Overnight</label>
+            </div>
+        </div>
+
+        <!-- Committees (drag to rank) -->
+        <div class="section-card">
+            <h2>Committee Preferences</h2>
+            <p class="subtitle">Drag to rank — top = most preferred</p>
+            <ul class="rank-list" id="committee-list">
+                <li class="rank-item" draggable="true" data-committee="Lifting">
+                    <span class="rank-number"></span>
+                    <span>Receiving: Lifting</span>
+                    <span class="drag-handle">&#9776;</span>
+                </li>
+                <li class="rank-item" draggable="true" data-committee="Stocking">
+                    <span class="rank-number"></span>
+                    <span>Stocking</span>
+                    <span class="drag-handle">&#9776;</span>
+                </li>
+                <li class="rank-item" draggable="true" data-committee="Flex">
+                    <span class="rank-number"></span>
+                    <span>Flex Worker</span>
+                    <span class="drag-handle">&#9776;</span>
+                </li>
+                <li class="rank-item" draggable="true" data-committee="Cleaning">
+                    <span class="rank-number"></span>
+                    <span>Cleaning</span>
+                    <span class="drag-handle">&#9776;</span>
+                </li>
+                <li class="rank-item" draggable="true" data-committee="Producer">
+                    <span class="rank-number"></span>
+                    <span>Produce</span>
+                    <span class="drag-handle">&#9776;</span>
+                </li>
+                <li class="rank-item" draggable="true" data-committee="Dairy Lifting">
+                    <span class="rank-number"></span>
+                    <span>Dairy Lifting</span>
+                    <span class="drag-handle">&#9776;</span>
+                </li>
+                <li class="rank-item" draggable="true" data-committee="Produce Processing">
+                    <span class="rank-number"></span>
+                    <span>Produce Processing</span>
+                    <span class="drag-handle">&#9776;</span>
+                </li>
+                <li class="rank-item" draggable="true" data-committee="Inventory">
+                    <span class="rank-number"></span>
+                    <span>Inventory</span>
+                    <span class="drag-handle">&#9776;</span>
+                </li>
+                <li class="rank-item" draggable="true" data-committee="Bathroom">
+                    <span class="rank-number"></span>
+                    <span>Bathroom Cleaning</span>
+                    <span class="drag-handle">&#9776;</span>
+                </li>
+                <li class="rank-item" draggable="true" data-committee="Meat Processing & Lifting">
+                    <span class="rank-number"></span>
+                    <span>Meat Processing & Lifting</span>
+                    <span class="drag-handle">&#9776;</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Daily Email -->
+        <div class="section-card">
+            <h2>Daily Emails</h2>
+            <p class="subtitle">Get your top 5 matches delivered every day</p>
+            <div class="email-optin">
+                <input type="checkbox" id="email-optin">
+                <label for="email-optin">Send me daily emails with my top 5 matches (8:01 PM)</label>
+            </div>
+            <div class="email-field" id="email-field">
+                <input type="email" id="email-input" placeholder="your.email@example.com">
+            </div>
+        </div>
+
+        <!-- CTA -->
+        <button class="btn-primary" id="find-matches-btn" onclick="showLoginModal()">
+            Find My Match
+        </button>
+    </div>
+
+    <!-- ============================================================
+         LOGIN MODAL
+         ============================================================ -->
+    <div class="modal-overlay" id="login-modal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeLoginModal()">&times;</button>
+            <h2>Log in to PSFC</h2>
+            <p class="modal-subtitle">We'll fetch available shifts from the member portal.</p>
+
+            <div class="modal-error" id="login-error"></div>
+
+            <label for="member-number">Member Number or Email</label>
+            <input type="text" id="member-number" placeholder="Member number or email">
+
+            <label for="member-password">Password</label>
+            <input type="password" id="member-password" placeholder="Your password">
+
+            <button class="btn-primary" id="discover-btn" onclick="discoverMatches()">
+                Discover My Matches
+            </button>
+
+            <p class="fine-print">
+                Your credentials are sent directly to members.foodcoop.com over HTTPS.<br>
+                We never store your password.
+            </p>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         MATCHES SCREEN
+         ============================================================ -->
+    <div class="container" id="matches-screen">
+
+        <!-- Filter Bar -->
+        <div class="filter-bar" id="filter-bar">
+            <span class="filter-label">Filters:</span>
+            <div id="filter-chips"></div>
+            <div class="bar-actions">
+                <button class="btn-fire" onclick="showTop5Modal()">View Top 5 Matches</button>
+                <button class="btn-outline" onclick="editProfile()">Edit Profile</button>
+            </div>
+        </div>
+
+        <!-- Status message -->
+        <div class="results-status" id="results-status"></div>
+
+        <!-- Grid -->
+        <div class="shift-grid" id="shift-grid"></div>
+
+        <!-- Load More -->
+        <div class="load-more-container" id="load-more-container" style="display:none;">
+            <button class="btn-load-more" id="load-more-btn" onclick="loadMoreShifts()">
+                Load More Shifts
+            </button>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         TOP 5 MODAL
+         ============================================================ -->
+    <div class="top5-modal" id="top5-modal">
+        <div class="top5-content">
+            <button class="modal-close" onclick="closeTop5()" style="position:absolute;top:16px;right:18px;background:none;border:none;font-size:1.4rem;color:rgba(255,255,255,0.4);cursor:pointer;">&times;</button>
+            <h2>Your Top 5 Matches</h2>
+            <div id="top5-list"></div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         DETAIL MODAL
+         ============================================================ -->
+    <div class="detail-modal" id="detail-modal">
+        <div class="detail-content" id="detail-content"></div>
+    </div>
+
+
+    <!-- ============================================================
+         JAVASCRIPT
+         ============================================================ -->
+    <script>
+    // ---- State ----
+    let allScoredShifts = [];
+    let currentPreferences = {};
+    let savedCredentials = {};
+    let visibleCount = 10;
+
+    // ---- Helpers ----
+    function getSelectedValues(containerId) {
+        const checkboxes = document.querySelectorAll(`#${containerId} input[type="checkbox"]:checked`);
+        return Array.from(checkboxes).map(cb => cb.value);
+    }
+
+    function getCommitteeRanking() {
+        const items = document.querySelectorAll('#committee-list .rank-item');
+        return Array.from(items).map(item => item.dataset.committee);
+    }
+
+    function gatherPreferences() {
+        return {
+            days: getSelectedValues('day-pills'),
+            times: getSelectedValues('time-pills'),
+            committees: getCommitteeRanking(),
+        };
+    }
+
+    function scoreBadgeHTML(score) {
+        if (score >= 90) return `<span class="score-badge score-fire">&#x1F525; ${score}%</span>`;
+        if (score >= 75) return `<span class="score-badge score-purple">&#x1F49C; ${score}%</span>`;
+        return `<span class="score-badge score-star">&#x2B50; ${score}%</span>`;
+    }
+
+    function scoreBadgeClass(score) {
+        if (score >= 90) return 'score-fire';
+        if (score >= 75) return 'score-purple';
+        return 'score-star';
+    }
+
+    function breakdownIcon(text) {
+        if (text.includes('+')) return '&#x2705;';
+        if (text.includes('-')) return '&#x274C;';
+        if (text.includes('preferred') || text.includes('Top choice')) return '&#x2705;';
+        if (text.includes('not preferred') || text.includes('Not in') || text.includes('Late')) return '&#x274C;';
+        return '&#x2796;';
+    }
+
+    // ---- Email opt-in toggle ----
+    document.getElementById('email-optin').addEventListener('change', function() {
+        document.getElementById('email-field').classList.toggle('show', this.checked);
+    });
+
+    // ---- Drag and drop for committee ranking ----
+    (function setupDragDrop() {
+        const list = document.getElementById('committee-list');
+        let dragItem = null;
+
+        list.addEventListener('dragstart', function(e) {
+            dragItem = e.target.closest('.rank-item');
+            if (dragItem) {
+                dragItem.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            }
+        });
+        list.addEventListener('dragend', function() {
+            if (dragItem) dragItem.classList.remove('dragging');
+            dragItem = null;
+        });
+        list.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            const afterElement = getDragAfterElement(list, e.clientY);
+            const dragging = document.querySelector('.dragging');
+            if (!dragging) return;
+            if (!afterElement) {
+                list.appendChild(dragging);
+            } else {
+                list.insertBefore(dragging, afterElement);
+            }
+        });
+
+        function getDragAfterElement(container, y) {
+            const elements = [...container.querySelectorAll('.rank-item:not(.dragging)')];
+            return elements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset, element: child };
+                }
+                return closest;
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+    })();
+
+    // ---- Modal controls ----
+    function showLoginModal() {
+        currentPreferences = gatherPreferences();
+        document.getElementById('login-modal').classList.add('show');
+        document.getElementById('member-number').focus();
+    }
+
+    function closeLoginModal() {
+        document.getElementById('login-modal').classList.remove('show');
+        document.getElementById('login-error').classList.remove('show');
+    }
+
+    function showLoading() {
+        document.getElementById('loading').classList.add('show');
+    }
+    function hideLoading() {
+        document.getElementById('loading').classList.remove('show');
+    }
+
+    // ---- Core: Discover Matches ----
+    async function discoverMatches() {
+        const memberNumber = document.getElementById('member-number').value.trim();
+        const password = document.getElementById('member-password').value.trim();
+
+        if (!memberNumber || !password) {
+            const err = document.getElementById('login-error');
+            err.textContent = 'Please enter both your member number and password.';
+            err.classList.add('show');
+            return;
+        }
+
+        savedCredentials = { member_number: memberNumber, password: password };
+        closeLoginModal();
+        showLoading();
+
+        try {
+            const resp = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    member_number: memberNumber,
+                    password: password,
+                    preferences: currentPreferences,
+                }),
+            });
+            const data = await resp.json();
+
+            if (!data.success) {
+                hideLoading();
+                const err = document.getElementById('login-error');
+                let errHTML = `<strong>${data.message || 'Login failed.'}</strong>`;
+                if (data.debug && data.debug.length > 0) {
+                    errHTML += `<div style="margin-top:8px;font-size:0.8rem;color:rgba(255,255,255,0.5);font-family:monospace;text-align:left;">`;
+                    data.debug.forEach(d => { errHTML += d + '<br>'; });
+                    errHTML += `</div>`;
+                }
+                errHTML += `<div style="margin-top:10px;font-size:0.82rem;color:rgba(255,255,255,0.6);">` +
+                    `Try logging in at <a href="https://members.foodcoop.com/services/login/" target="_blank" ` +
+                    `style="color:var(--pink);font-weight:600;">members.foodcoop.com</a> first to verify your credentials.</div>`;
+                err.innerHTML = errHTML;
+                err.classList.add('show');
+                document.getElementById('login-modal').classList.add('show');
+                return;
+            }
+
+            allScoredShifts = data.scored_shifts || [];
+            const source = data.source || 'live';
+
+            // Sign up for daily emails if opted in
+            if (document.getElementById('email-optin').checked) {
+                const email = document.getElementById('email-input').value.trim();
+                if (email) {
+                    fetch('/api/signup-daily-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: email,
+                            member_number: memberNumber,
+                            password: password,
+                            preferences: currentPreferences,
+                        }),
+                    });
+                }
+            }
+
+            hideLoading();
+            showMatchesScreen(source, data.message);
+
+        } catch (err) {
+            hideLoading();
+            // Fallback to mock data
+            try {
+                const mockResp = await fetch('/api/mock-shifts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ preferences: currentPreferences }),
+                });
+                const mockData = await mockResp.json();
+                allScoredShifts = mockData.scored_shifts || [];
+                hideLoading();
+                showMatchesScreen('mock', 'Connection failed — showing sample data.');
+            } catch (e2) {
+                hideLoading();
+                alert('Could not connect to the server. Is it running?');
+            }
+        }
+    }
+
+    // ---- Render matches screen ----
+    function showMatchesScreen(source, message) {
+        document.getElementById('profile-screen').style.display = 'none';
+        document.getElementById('matches-screen').style.display = 'block';
+
+        // Build filter chips
+        const chipsContainer = document.getElementById('filter-chips');
+        chipsContainer.innerHTML = '';
+        currentPreferences.days.forEach(d => {
+            chipsContainer.innerHTML += `<span class="filter-chip">${d}</span> `;
+        });
+        currentPreferences.times.forEach(t => {
+            chipsContainer.innerHTML += `<span class="filter-chip">${t}</span> `;
+        });
+        if (currentPreferences.committees.length > 0) {
+            chipsContainer.innerHTML += `<span class="filter-chip">#1 ${currentPreferences.committees[0]}</span> `;
+        }
+
+        // Status
+        const status = document.getElementById('results-status');
+        const sourceLabel = source === 'live' ? 'Live data from PSFC' : 'Sample data (demo mode)';
+        status.innerHTML = `Found ${allScoredShifts.length} matches &middot; ${sourceLabel}` +
+            (message ? ` &middot; ${message}` : '');
+
+        // Reset visible count and render
+        visibleCount = 10;
+        renderGrid(allScoredShifts);
+    }
+
+    function renderGrid(scored) {
+        const grid = document.getElementById('shift-grid');
+        grid.innerHTML = '';
+
+        const toShow = scored.slice(0, visibleCount);
+        const hasMore = scored.length > visibleCount;
+
+        toShow.forEach((item, idx) => {
+            const shift = item.shift;
+            const score = item.score;
+            const isTop = idx < 5;
+            const card = document.createElement('div');
+            card.className = `shift-card${isTop ? ' top-match' : ''}`;
+            card.onclick = () => showDetail(item);
+            card.innerHTML = `
+                ${scoreBadgeHTML(score)}
+                <div class="card-committee">${shift.committee}</div>
+                <div class="card-meta">
+                    <span class="card-tag">&#x1F4C5; ${shift.day}</span>
+                    <span class="card-tag">&#x1F552; ${shift.time_raw || shift.time_slot}</span>
+                    <span class="card-tag">&#x1F465; ${shift.slots} slots</span>
+                </div>
+                <div class="card-desc">${shift.description}</div>
+                <button class="btn-details" onclick="event.stopPropagation(); showDetail(allScoredShifts[${idx}])">
+                    View Details
+                </button>
+            `;
+            grid.appendChild(card);
+        });
+
+        // Show/hide Load More button
+        const loadMoreContainer = document.getElementById('load-more-container');
+        if (hasMore) {
+            const remaining = scored.length - visibleCount;
+            document.getElementById('load-more-btn').textContent = `Load More Shifts (${remaining} remaining)`;
+            loadMoreContainer.style.display = 'block';
+        } else {
+            loadMoreContainer.style.display = 'none';
+        }
+    }
+
+    function loadMoreShifts() {
+        visibleCount += 10;
+        renderGrid(allScoredShifts);
+        const grid = document.getElementById('shift-grid');
+        const cards = grid.querySelectorAll('.shift-card');
+        if (cards.length > 0) {
+            cards[cards.length - Math.min(10, cards.length)].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    // ---- Detail modal ----
+    function showDetail(item) {
+        const shift = item.shift;
+        const score = item.score;
+        const breakdown = item.breakdown;
+        const badgeClass = scoreBadgeClass(score);
+        const modal = document.getElementById('detail-modal');
+        const content = document.getElementById('detail-content');
+
+        let breakdownHTML = '';
+        for (const [key, val] of Object.entries(breakdown)) {
+            breakdownHTML += `<li><span class="bd-icon">${breakdownIcon(val)}</span> ${val}</li>`;
+        }
+
+        content.innerHTML = `
+            <button class="detail-close" onclick="closeDetail()">&times;</button>
+            <span class="detail-score ${badgeClass}">${score}% Match</span>
+            <h3>${shift.committee}</h3>
+            <div class="detail-time">${shift.day} &middot; ${shift.time_raw || shift.time_slot} &middot; ${shift.slots} slots</div>
+            <div class="detail-desc">${shift.description}</div>
+            <div class="breakdown-title">Match Breakdown</div>
+            <ul class="breakdown-list">${breakdownHTML}</ul>
+            ${shift.signup_url
+                ? `<a href="${shift.signup_url}" target="_blank" rel="noopener" class="btn-claim">Claim on PSFC Portal</a>`
+                : `<button class="btn-claim" disabled style="opacity:0.5;cursor:default;">No signup link available</button>`
+            }
+        `;
+        modal.classList.add('show');
+    }
+
+    function closeDetail() {
+        document.getElementById('detail-modal').classList.remove('show');
+    }
+
+    // ---- Top 5 modal ----
+    function showTop5Modal() {
+        const top5 = allScoredShifts.slice(0, 5);
+        const list = document.getElementById('top5-list');
+        list.innerHTML = '';
+        top5.forEach((item, idx) => {
+            const shift = item.shift;
+            const score = item.score;
+            const badgeClass = scoreBadgeClass(score);
+            list.innerHTML += `
+                <div class="top5-item" style="cursor:pointer" onclick="closeTop5(); showDetail(allScoredShifts[${idx}])">
+                    <span class="top5-rank">${idx + 1}</span>
+                    <div class="top5-info">
+                        <div class="t5-committee">${shift.committee}</div>
+                        <div class="t5-when">${shift.day} &middot; ${shift.time_raw || shift.time_slot}</div>
+                    </div>
+                    <span class="top5-score ${badgeClass}" style="color:#fff;font-size:0.85rem;">${score}%</span>
+                </div>
+            `;
+        });
+        document.getElementById('top5-modal').classList.add('show');
+    }
+
+    function closeTop5() {
+        document.getElementById('top5-modal').classList.remove('show');
+    }
+
+    // ---- Edit Profile ----
+    function editProfile() {
+        document.getElementById('matches-screen').style.display = 'none';
+        document.getElementById('profile-screen').style.display = 'block';
+    }
+
+    // ---- Close modals on overlay click ----
+    document.getElementById('login-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeLoginModal();
+    });
+    document.getElementById('detail-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeDetail();
+    });
+    document.getElementById('top5-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeTop5();
+    });
+
+    // ---- Keyboard: Esc closes modals ----
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeLoginModal();
+            closeDetail();
+            closeTop5();
+        }
+    });
+    </script>
+</body>
+</html>
