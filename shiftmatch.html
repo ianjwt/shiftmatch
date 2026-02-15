@@ -229,6 +229,47 @@
             flex-shrink: 0;
         }
 
+        /* Exclude button */
+        .exclude-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid rgba(230, 57, 70, 0.3);
+            background: rgba(255, 179, 186, 0.15);
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s;
+            line-height: 1;
+        }
+        .exclude-btn:hover {
+            border-color: var(--red);
+            color: var(--red);
+            background: rgba(230, 57, 70, 0.1);
+        }
+        .exclude-btn.active {
+            background: var(--red);
+            border-color: var(--red);
+            color: #fff;
+        }
+
+        /* Excluded rank item */
+        .rank-item.excluded {
+            opacity: 0.4;
+            background: rgba(230, 57, 70, 0.06);
+        }
+        .rank-item.excluded > span:nth-child(2) {
+            text-decoration: line-through;
+        }
+        .rank-item.excluded .rank-number {
+            background: var(--text-muted);
+        }
+
         /* Email opt-in */
         .email-optin {
             display: flex;
@@ -572,6 +613,129 @@
             background: rgba(230, 57, 70, 0.15);
         }
 
+        /* Hero Card (#1 match) */
+        @keyframes heroPulse {
+            0%, 100% { box-shadow: 0 12px 48px rgba(230, 57, 70, 0.3); }
+            50% { box-shadow: 0 16px 56px rgba(230, 57, 70, 0.4); }
+        }
+        .hero-card {
+            background: var(--card-bg);
+            border: 4px solid #E63946;
+            border-radius: 32px;
+            padding: 40px;
+            margin-bottom: 30px;
+            text-align: center;
+            position: relative;
+            overflow: visible;
+            cursor: pointer;
+            animation: heroPulse 3s ease-in-out infinite;
+            transition: transform 0.25s;
+        }
+        .hero-card:hover {
+            transform: translateY(-4px);
+        }
+        .hero-badge {
+            position: absolute;
+            top: -16px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 8px 24px;
+            border-radius: var(--radius-pill);
+            background: var(--gradient-red);
+            color: #fff;
+            font-size: 0.95rem;
+            font-weight: 800;
+            white-space: nowrap;
+            box-shadow: 0 4px 16px rgba(230, 57, 70, 0.4);
+        }
+        .hero-score {
+            font-size: 72px;
+            font-weight: 800;
+            color: var(--red);
+            line-height: 1;
+            margin-top: 20px;
+        }
+        .hero-score span {
+            font-size: 32px;
+            font-weight: 700;
+        }
+        .hero-committee {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin: 8px 0 12px;
+        }
+        .hero-date {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .hero-time {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        .hero-slots {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+        .hero-why {
+            background: rgba(255, 179, 186, 0.2);
+            border: 1px solid rgba(230, 57, 70, 0.15);
+            border-radius: var(--radius-sm);
+            padding: 18px 24px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .hero-why-title {
+            font-weight: 800;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--red);
+            margin-bottom: 8px;
+        }
+        .hero-why ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .hero-why li {
+            padding: 4px 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        .hero-why li .bd-icon { margin-right: 6px; }
+        .btn-hero-claim {
+            display: inline-block;
+            padding: 20px 48px;
+            background: var(--gradient-red);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius);
+            font-family: inherit;
+            font-size: 20px;
+            font-weight: 800;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 6px 28px rgba(230, 57, 70, 0.4);
+        }
+        .btn-hero-claim:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(230, 57, 70, 0.55);
+        }
+
+        /* Secondary matches header */
+        .secondary-header {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 16px;
+        }
+
         /* Load More button */
         .load-more-container {
             text-align: center;
@@ -830,6 +994,11 @@
             .filter-bar .bar-actions button { flex: 1; }
             .floating-heart { display: none; }
             .cupid-decoration { display: none; }
+            .hero-card { padding: 28px 18px; }
+            .hero-score { font-size: 52px; }
+            .hero-committee { font-size: 26px; }
+            .hero-date { font-size: 20px; }
+            .btn-hero-claim { padding: 16px 32px; font-size: 17px; }
         }
     </style>
 </head>
@@ -901,61 +1070,73 @@
                 <li class="rank-item" draggable="true" data-committee="Checkout">
                     <span class="rank-number"></span>
                     <span>Checkout</span>
+                    <button class="exclude-btn" title="Exclude this committee">&times;</button>
                     <span class="drag-handle">&#9776;</span>
                 </li>
                 <li class="rank-item" draggable="true" data-committee="Cashier">
                     <span class="rank-number"></span>
                     <span>Cashier</span>
+                    <button class="exclude-btn" title="Exclude this committee">&times;</button>
                     <span class="drag-handle">&#9776;</span>
                 </li>
                 <li class="rank-item" draggable="true" data-committee="Stocking">
                     <span class="rank-number"></span>
                     <span>Stocking</span>
+                    <button class="exclude-btn" title="Exclude this committee">&times;</button>
                     <span class="drag-handle">&#9776;</span>
                 </li>
                 <li class="rank-item" draggable="true" data-committee="Receiving">
                     <span class="rank-number"></span>
                     <span>Receiving / Lifting</span>
+                    <button class="exclude-btn" title="Exclude this committee">&times;</button>
                     <span class="drag-handle">&#9776;</span>
                 </li>
                 <li class="rank-item" draggable="true" data-committee="Produce">
                     <span class="rank-number"></span>
                     <span>Produce</span>
+                    <button class="exclude-btn" title="Exclude this committee">&times;</button>
                     <span class="drag-handle">&#9776;</span>
                 </li>
                 <li class="rank-item" draggable="true" data-committee="Food Processing">
                     <span class="rank-number"></span>
                     <span>Food Processing</span>
+                    <button class="exclude-btn" title="Exclude this committee">&times;</button>
                     <span class="drag-handle">&#9776;</span>
                 </li>
                 <li class="rank-item" draggable="true" data-committee="Cleaning">
                     <span class="rank-number"></span>
                     <span>Cleaning</span>
+                    <button class="exclude-btn" title="Exclude this committee">&times;</button>
                     <span class="drag-handle">&#9776;</span>
                 </li>
                 <li class="rank-item" draggable="true" data-committee="Dairy Lifting">
                     <span class="rank-number"></span>
                     <span>Dairy Lifting</span>
+                    <button class="exclude-btn" title="Exclude this committee">&times;</button>
                     <span class="drag-handle">&#9776;</span>
                 </li>
                 <li class="rank-item" draggable="true" data-committee="Inventory">
                     <span class="rank-number"></span>
                     <span>Inventory</span>
+                    <button class="exclude-btn" title="Exclude this committee">&times;</button>
                     <span class="drag-handle">&#9776;</span>
                 </li>
                 <li class="rank-item" draggable="true" data-committee="Flex">
                     <span class="rank-number"></span>
                     <span>Flex Worker</span>
+                    <button class="exclude-btn" title="Exclude this committee">&times;</button>
                     <span class="drag-handle">&#9776;</span>
                 </li>
                 <li class="rank-item" draggable="true" data-committee="Maintenance">
                     <span class="rank-number"></span>
                     <span>Maintenance</span>
+                    <button class="exclude-btn" title="Exclude this committee">&times;</button>
                     <span class="drag-handle">&#9776;</span>
                 </li>
                 <li class="rank-item" draggable="true" data-committee="Bathroom">
                     <span class="rank-number"></span>
                     <span>Bathroom Cleaning</span>
+                    <button class="exclude-btn" title="Exclude this committee">&times;</button>
                     <span class="drag-handle">&#9776;</span>
                 </li>
             </ul>
@@ -1018,7 +1199,6 @@
             <span class="filter-label">Filters:</span>
             <div id="filter-chips"></div>
             <div class="bar-actions">
-                <button class="btn-fire" onclick="showTop5Modal()">View Top 5 Matches</button>
                 <button class="btn-outline" onclick="editProfile()">Edit Profile</button>
             </div>
         </div>
@@ -1026,15 +1206,12 @@
         <!-- Status message -->
         <div class="results-status" id="results-status"></div>
 
-        <!-- Grid -->
-        <div class="shift-grid" id="shift-grid"></div>
+        <!-- Hero card (top match) -->
+        <div id="hero-container"></div>
 
-        <!-- Load More -->
-        <div class="load-more-container" id="load-more-container" style="display:none;">
-            <button class="btn-load-more" id="load-more-btn" onclick="loadMoreShifts()">
-                Load More Shifts
-            </button>
-        </div>
+        <!-- Secondary matches -->
+        <div class="secondary-header" id="secondary-header" style="display:none;">Other Good Matches</div>
+        <div class="shift-grid" id="shift-grid"></div>
     </div>
 
     <!-- ============================================================
@@ -1064,7 +1241,6 @@
     let allScoredShifts = [];
     let currentPreferences = {};
     let savedCredentials = {};
-    let visibleCount = 10;
 
     // ---- Helpers ----
     function getSelectedValues(containerId) {
@@ -1073,7 +1249,12 @@
     }
 
     function getCommitteeRanking() {
-        const items = document.querySelectorAll('#committee-list .rank-item');
+        const items = document.querySelectorAll('#committee-list .rank-item:not(.excluded)');
+        return Array.from(items).map(item => item.dataset.committee);
+    }
+
+    function getExcludedCommittees() {
+        const items = document.querySelectorAll('#committee-list .rank-item.excluded');
         return Array.from(items).map(item => item.dataset.committee);
     }
 
@@ -1082,6 +1263,7 @@
             days: getSelectedValues('day-pills'),
             times: getSelectedValues('time-pills'),
             committees: getCommitteeRanking(),
+            excludedCommittees: getExcludedCommittees(),
         };
     }
 
@@ -1150,6 +1332,17 @@
             }, { offset: Number.NEGATIVE_INFINITY }).element;
         }
     })();
+
+    // ---- Exclude button click handler ----
+    document.getElementById('committee-list').addEventListener('click', function(e) {
+        const btn = e.target.closest('.exclude-btn');
+        if (!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const item = btn.closest('.rank-item');
+        item.classList.toggle('excluded');
+        btn.classList.toggle('active');
+    });
 
     // ---- Modal controls ----
     function showLoginModal() {
@@ -1283,59 +1476,81 @@
         status.innerHTML = `Found ${allScoredShifts.length} matches &middot; ${sourceLabel}` +
             (message ? ` &middot; ${message}` : '');
 
-        // Reset visible count and render
-        visibleCount = 10;
         renderGrid(allScoredShifts);
     }
 
     function renderGrid(scored) {
+        const heroContainer = document.getElementById('hero-container');
         const grid = document.getElementById('shift-grid');
+        const secondaryHeader = document.getElementById('secondary-header');
+        heroContainer.innerHTML = '';
         grid.innerHTML = '';
 
-        const toShow = scored.slice(0, visibleCount);
-        const hasMore = scored.length > visibleCount;
+        const top5 = scored.slice(0, 5);
+        if (top5.length === 0) return;
 
-        toShow.forEach((item, idx) => {
-            const shift = item.shift;
-            const score = item.score;
-            const isTop = idx < 5;
-            const card = document.createElement('div');
-            card.className = `shift-card${isTop ? ' top-match' : ''}`;
-            card.onclick = () => showDetail(item);
-            card.innerHTML = `
-                ${scoreBadgeHTML(score)}
-                <div class="card-committee">${shift.committee}</div>
-                <div class="card-meta">
-                    <span class="card-tag">&#x1F4C5; ${shift.day}</span>
-                    <span class="card-tag">&#x1F552; ${shift.time_raw || shift.time_slot}</span>
-                    <span class="card-tag">&#x1F465; ${shift.slots} slots</span>
-                </div>
-                <div class="card-desc">${shift.description}</div>
-                <button class="btn-details" onclick="event.stopPropagation(); showDetail(allScoredShifts[${idx}])">
-                    View Details
-                </button>
-            `;
-            grid.appendChild(card);
-        });
+        // ---- Hero card (top match) ----
+        const hero = top5[0];
+        const hShift = hero.shift;
+        const hScore = hero.score;
+        const hDay = hShift.date ? hShift.day + ' ' + hShift.date : hShift.day;
 
-        // Show/hide Load More button
-        const loadMoreContainer = document.getElementById('load-more-container');
-        if (hasMore) {
-            const remaining = scored.length - visibleCount;
-            document.getElementById('load-more-btn').textContent = `Load More Shifts (${remaining} remaining)`;
-            loadMoreContainer.style.display = 'block';
-        } else {
-            loadMoreContainer.style.display = 'none';
+        let whyHTML = '';
+        for (const [key, val] of Object.entries(hero.breakdown)) {
+            whyHTML += `<li><span class="bd-icon">${breakdownIcon(val)}</span> ${val}</li>`;
         }
-    }
 
-    function loadMoreShifts() {
-        visibleCount += 10;
-        renderGrid(allScoredShifts);
-        const grid = document.getElementById('shift-grid');
-        const cards = grid.querySelectorAll('.shift-card');
-        if (cards.length > 0) {
-            cards[cards.length - Math.min(10, cards.length)].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const claimBtn = hShift.signup_url
+            ? `<a href="${hShift.signup_url}" target="_blank" rel="noopener" class="btn-hero-claim" onclick="event.stopPropagation()">Claim This Shift &#x2192;</a>`
+            : `<button class="btn-hero-claim" disabled style="opacity:0.5;cursor:default;">No signup link available</button>`;
+
+        const heroEl = document.createElement('div');
+        heroEl.className = 'hero-card';
+        heroEl.onclick = () => showDetail(hero);
+        heroEl.innerHTML = `
+            <div class="hero-badge">&#x1F525; #1 BEST MATCH</div>
+            <div class="hero-score">${hScore}<span>%</span></div>
+            <div class="hero-committee">${hShift.committee}</div>
+            <div class="hero-date">${hDay}</div>
+            <div class="hero-time">${hShift.time_raw || hShift.time_slot}</div>
+            <div class="hero-slots">${hShift.slots} slots available</div>
+            <div class="hero-why">
+                <div class="hero-why-title">Why It's Perfect</div>
+                <ul>${whyHTML}</ul>
+            </div>
+            ${claimBtn}
+        `;
+        heroContainer.appendChild(heroEl);
+
+        // ---- Secondary cards (2-5) ----
+        const rest = top5.slice(1);
+        if (rest.length > 0) {
+            secondaryHeader.style.display = 'block';
+            rest.forEach((item, idx) => {
+                const shift = item.shift;
+                const score = item.score;
+                const dayLabel = shift.date ? shift.day + ' ' + shift.date : shift.day;
+                const descHTML = shift.description ? `<div class="card-desc">${shift.description}</div>` : '';
+                const card = document.createElement('div');
+                card.className = 'shift-card top-match';
+                card.onclick = () => showDetail(item);
+                card.innerHTML = `
+                    ${scoreBadgeHTML(score)}
+                    <div class="card-committee">${shift.committee}</div>
+                    <div class="card-meta">
+                        <span class="card-tag">&#x1F4C5; ${dayLabel}</span>
+                        <span class="card-tag">&#x1F552; ${shift.time_raw || shift.time_slot}</span>
+                        <span class="card-tag">&#x1F465; ${shift.slots} slots</span>
+                    </div>
+                    ${descHTML}
+                    <button class="btn-details" onclick="event.stopPropagation(); showDetail(allScoredShifts[${idx + 1}])">
+                        View Details
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        } else {
+            secondaryHeader.style.display = 'none';
         }
     }
 
@@ -1353,12 +1568,14 @@
             breakdownHTML += `<li><span class="bd-icon">${breakdownIcon(val)}</span> ${val}</li>`;
         }
 
+        const detailDay = shift.date ? shift.day + ' ' + shift.date : shift.day;
+        const detailDescHTML = shift.description ? `<div class="detail-desc">${shift.description}</div>` : '';
         content.innerHTML = `
             <button class="detail-close" onclick="closeDetail()">&times;</button>
             <span class="detail-score ${badgeClass}">${score}% Match</span>
             <h3>${shift.committee}</h3>
-            <div class="detail-time">${shift.day} &middot; ${shift.time_raw || shift.time_slot} &middot; ${shift.slots} slots</div>
-            <div class="detail-desc">${shift.description}</div>
+            <div class="detail-time">${detailDay} &middot; ${shift.time_raw || shift.time_slot} &middot; ${shift.slots} slots</div>
+            ${detailDescHTML}
             <div class="breakdown-title">Match Breakdown</div>
             <ul class="breakdown-list">${breakdownHTML}</ul>
             ${shift.signup_url

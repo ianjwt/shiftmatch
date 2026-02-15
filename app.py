@@ -435,14 +435,8 @@ class ShiftMatchCrawler:
                     status = "available"
                     slots = "1"
 
-                # Build description
+                # Build description (committee, date, and time shown separately)
                 desc_parts = []
-                if committee_clean:
-                    desc_parts.append(committee_clean)
-                if date_str:
-                    desc_parts.append(date_str)
-                if time_raw:
-                    desc_parts.append(time_raw)
                 if is_carrot:
                     desc_parts.append("Carrot shift (extra credit)")
                 if is_unavail:
@@ -480,6 +474,7 @@ class ShiftMatcher:
         self.days = [d.lower() for d in preferences.get("days", [])]
         self.times = [t.lower() for t in preferences.get("times", [])]
         self.committees = preferences.get("committees", [])  # ordered by rank (index 0 = top)
+        self.excluded = [c.lower() for c in preferences.get("excludedCommittees", [])]
 
     def score(self, shift: dict) -> dict:
         base = 100
@@ -554,7 +549,8 @@ class ShiftMatcher:
         return {"shift": shift, "score": score, "breakdown": breakdown}
 
     def rank(self, shifts: list) -> list:
-        scored = [self.score(s) for s in shifts]
+        filtered = [s for s in shifts if s.get("committee", "").lower() not in self.excluded]
+        scored = [self.score(s) for s in filtered]
         scored.sort(key=lambda x: x["score"], reverse=True)
         return scored
 
