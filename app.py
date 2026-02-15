@@ -16,7 +16,7 @@ import requests
 from bs4 import BeautifulSoup
 from flask import Flask, request, jsonify, send_from_directory
 
-app = Flask(__name__, static_folder=None)
+app = Flask(__name__, static_folder='static')
 app.secret_key = os.urandom(24).hex()
 
 # ---------------------------------------------------------------------------
@@ -604,6 +604,39 @@ def generate_mock_shifts(n: int = 30) -> list:
 
 
 # ---------------------------------------------------------------------------
+# Shift Cache (15-minute TTL via rotating cache key)
+# ---------------------------------------------------------------------------
+def _shift_cache_key():
+    """Generate a cache key that rotates every 15 minutes."""
+    now = datetime.now()
+    return f"{now.year}{now.month}{now.day}{now.hour}{now.minute // 15}"
+
+
+# Store the last successful crawler + shifts so we can reuse within the window
+_shift_cache = {"key": None, "parsed_shifts": [], "html": "", "debug": []}
+
+
+def get_cached_shifts(crawler):
+    """Return cached shifts if within the 15-minute window, otherwise re-crawl."""
+    key = _shift_cache_key()
+    if _shift_cache["key"] == key and _shift_cache["parsed_shifts"]:
+        return {
+            "success": True,
+            "html": _shift_cache["html"],
+            "parsed_shifts": _shift_cache["parsed_shifts"],
+            "message": "OK (cached)",
+            "debug": _shift_cache["debug"] + ["Using cached shifts"],
+        }
+    result = crawler.get_shifts()
+    if result["success"] and result["parsed_shifts"]:
+        _shift_cache["key"] = key
+        _shift_cache["parsed_shifts"] = result["parsed_shifts"]
+        _shift_cache["html"] = result["html"]
+        _shift_cache["debug"] = result.get("debug", [])
+    return result
+
+
+# ---------------------------------------------------------------------------
 # Flask Routes
 # ---------------------------------------------------------------------------
 
@@ -628,7 +661,7 @@ def api_login():
     debug = result.get("debug", [])
 
     if result["success"]:
-        shift_result = crawler.get_shifts()
+        shift_result = get_cached_shifts(crawler)
         shift_debug = shift_result.get("debug", [])
         debug.extend(shift_debug)
 
