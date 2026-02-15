@@ -192,6 +192,7 @@
             align-items: center;
             gap: 14px;
             padding: 12px 16px;
+            min-height: 60px;
             margin-bottom: 6px;
             background: rgba(255, 179, 186, 0.1);
             border-radius: var(--radius-sm);
@@ -202,11 +203,17 @@
             font-size: 0.9rem;
             color: var(--text-primary);
         }
-        .rank-item:active { cursor: grabbing; }
-        .rank-item.dragging {
-            opacity: 0.5;
+        .rank-item:active {
+            cursor: grabbing;
             border-color: var(--red);
             background: rgba(230, 57, 70, 0.08);
+        }
+        .rank-item.dragging {
+            opacity: 0.8;
+            border-color: var(--red);
+            background: rgba(230, 57, 70, 0.08);
+            transform: scale(1.05) rotate(2deg);
+            box-shadow: 0 8px 24px rgba(230, 57, 70, 0.3);
         }
         .rank-item .rank-number {
             width: 26px;
@@ -224,21 +231,20 @@
         .rank-item .rank-number::before { content: counter(rank); }
         .rank-item .drag-handle {
             color: var(--text-muted);
-            font-size: 1rem;
+            font-size: 28px;
+            padding: 10px;
             margin-left: auto;
             flex-shrink: 0;
         }
 
         /* Exclude button */
         .exclude-btn {
-            width: 24px;
-            height: 24px;
+            min-width: 44px;
+            min-height: 44px;
             border-radius: 50%;
-            border: 2px solid rgba(230, 57, 70, 0.3);
-            background: rgba(255, 179, 186, 0.15);
-            color: var(--text-muted);
-            font-size: 0.75rem;
-            font-weight: 700;
+            border: none;
+            background: transparent;
+            font-size: 20px;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -248,14 +254,10 @@
             line-height: 1;
         }
         .exclude-btn:hover {
-            border-color: var(--red);
-            color: var(--red);
-            background: rgba(230, 57, 70, 0.1);
+            transform: scale(1.2);
         }
         .exclude-btn.active {
-            background: var(--red);
-            border-color: var(--red);
-            color: #fff;
+            transform: scale(1.2);
         }
 
         /* Excluded rank item */
@@ -1070,76 +1072,77 @@
                 <li class="rank-item" draggable="true" data-committee="Checkout">
                     <span class="rank-number"></span>
                     <span>Checkout</span>
-                    <button class="exclude-btn" title="Exclude this committee">&times;</button>
+                    <button class="exclude-btn" title="Exclude this committee">💔</button>
                     <span class="drag-handle">&#9776;</span>
                 </li>
                 <li class="rank-item" draggable="true" data-committee="Cashier">
                     <span class="rank-number"></span>
                     <span>Cashier</span>
-                    <button class="exclude-btn" title="Exclude this committee">&times;</button>
+                    <button class="exclude-btn" title="Exclude this committee">💔</button>
                     <span class="drag-handle">&#9776;</span>
                 </li>
                 <li class="rank-item" draggable="true" data-committee="Stocking">
                     <span class="rank-number"></span>
                     <span>Stocking</span>
-                    <button class="exclude-btn" title="Exclude this committee">&times;</button>
+                    <button class="exclude-btn" title="Exclude this committee">💔</button>
                     <span class="drag-handle">&#9776;</span>
                 </li>
                 <li class="rank-item" draggable="true" data-committee="Receiving">
                     <span class="rank-number"></span>
                     <span>Receiving / Lifting</span>
-                    <button class="exclude-btn" title="Exclude this committee">&times;</button>
+                    <button class="exclude-btn" title="Exclude this committee">💔</button>
                     <span class="drag-handle">&#9776;</span>
                 </li>
                 <li class="rank-item" draggable="true" data-committee="Produce">
                     <span class="rank-number"></span>
                     <span>Produce</span>
-                    <button class="exclude-btn" title="Exclude this committee">&times;</button>
+                    <button class="exclude-btn" title="Exclude this committee">💔</button>
                     <span class="drag-handle">&#9776;</span>
                 </li>
                 <li class="rank-item" draggable="true" data-committee="Food Processing">
                     <span class="rank-number"></span>
                     <span>Food Processing</span>
-                    <button class="exclude-btn" title="Exclude this committee">&times;</button>
+                    <button class="exclude-btn" title="Exclude this committee">💔</button>
                     <span class="drag-handle">&#9776;</span>
                 </li>
                 <li class="rank-item" draggable="true" data-committee="Cleaning">
                     <span class="rank-number"></span>
                     <span>Cleaning</span>
-                    <button class="exclude-btn" title="Exclude this committee">&times;</button>
+                    <button class="exclude-btn" title="Exclude this committee">💔</button>
                     <span class="drag-handle">&#9776;</span>
                 </li>
                 <li class="rank-item" draggable="true" data-committee="Dairy Lifting">
                     <span class="rank-number"></span>
                     <span>Dairy Lifting</span>
-                    <button class="exclude-btn" title="Exclude this committee">&times;</button>
+                    <button class="exclude-btn" title="Exclude this committee">💔</button>
                     <span class="drag-handle">&#9776;</span>
                 </li>
                 <li class="rank-item" draggable="true" data-committee="Inventory">
                     <span class="rank-number"></span>
                     <span>Inventory</span>
-                    <button class="exclude-btn" title="Exclude this committee">&times;</button>
+                    <button class="exclude-btn" title="Exclude this committee">💔</button>
                     <span class="drag-handle">&#9776;</span>
                 </li>
                 <li class="rank-item" draggable="true" data-committee="Flex">
                     <span class="rank-number"></span>
                     <span>Flex Worker</span>
-                    <button class="exclude-btn" title="Exclude this committee">&times;</button>
+                    <button class="exclude-btn" title="Exclude this committee">💔</button>
                     <span class="drag-handle">&#9776;</span>
                 </li>
                 <li class="rank-item" draggable="true" data-committee="Maintenance">
                     <span class="rank-number"></span>
                     <span>Maintenance</span>
-                    <button class="exclude-btn" title="Exclude this committee">&times;</button>
+                    <button class="exclude-btn" title="Exclude this committee">💔</button>
                     <span class="drag-handle">&#9776;</span>
                 </li>
                 <li class="rank-item" draggable="true" data-committee="Bathroom">
                     <span class="rank-number"></span>
                     <span>Bathroom Cleaning</span>
-                    <button class="exclude-btn" title="Exclude this committee">&times;</button>
+                    <button class="exclude-btn" title="Exclude this committee">💔</button>
                     <span class="drag-handle">&#9776;</span>
                 </li>
             </ul>
+            <p style="color: #999; font-size: 13px; text-align: center; margin-top: 12px;">Tap and hold to reorder</p>
         </div>
 
         <!-- Daily Email -->
