@@ -898,9 +898,14 @@
             <h2>Committee Preferences</h2>
             <p class="subtitle">Drag to rank — top = most preferred</p>
             <ul class="rank-list" id="committee-list">
-                <li class="rank-item" draggable="true" data-committee="Lifting">
+                <li class="rank-item" draggable="true" data-committee="Checkout">
                     <span class="rank-number"></span>
-                    <span>Receiving: Lifting</span>
+                    <span>Checkout</span>
+                    <span class="drag-handle">&#9776;</span>
+                </li>
+                <li class="rank-item" draggable="true" data-committee="Cashier">
+                    <span class="rank-number"></span>
+                    <span>Cashier</span>
                     <span class="drag-handle">&#9776;</span>
                 </li>
                 <li class="rank-item" draggable="true" data-committee="Stocking">
@@ -908,9 +913,19 @@
                     <span>Stocking</span>
                     <span class="drag-handle">&#9776;</span>
                 </li>
-                <li class="rank-item" draggable="true" data-committee="Flex">
+                <li class="rank-item" draggable="true" data-committee="Receiving">
                     <span class="rank-number"></span>
-                    <span>Flex Worker</span>
+                    <span>Receiving / Lifting</span>
+                    <span class="drag-handle">&#9776;</span>
+                </li>
+                <li class="rank-item" draggable="true" data-committee="Produce">
+                    <span class="rank-number"></span>
+                    <span>Produce</span>
+                    <span class="drag-handle">&#9776;</span>
+                </li>
+                <li class="rank-item" draggable="true" data-committee="Food Processing">
+                    <span class="rank-number"></span>
+                    <span>Food Processing</span>
                     <span class="drag-handle">&#9776;</span>
                 </li>
                 <li class="rank-item" draggable="true" data-committee="Cleaning">
@@ -918,19 +933,9 @@
                     <span>Cleaning</span>
                     <span class="drag-handle">&#9776;</span>
                 </li>
-                <li class="rank-item" draggable="true" data-committee="Producer">
-                    <span class="rank-number"></span>
-                    <span>Produce</span>
-                    <span class="drag-handle">&#9776;</span>
-                </li>
                 <li class="rank-item" draggable="true" data-committee="Dairy Lifting">
                     <span class="rank-number"></span>
                     <span>Dairy Lifting</span>
-                    <span class="drag-handle">&#9776;</span>
-                </li>
-                <li class="rank-item" draggable="true" data-committee="Produce Processing">
-                    <span class="rank-number"></span>
-                    <span>Produce Processing</span>
                     <span class="drag-handle">&#9776;</span>
                 </li>
                 <li class="rank-item" draggable="true" data-committee="Inventory">
@@ -938,14 +943,19 @@
                     <span>Inventory</span>
                     <span class="drag-handle">&#9776;</span>
                 </li>
+                <li class="rank-item" draggable="true" data-committee="Flex">
+                    <span class="rank-number"></span>
+                    <span>Flex Worker</span>
+                    <span class="drag-handle">&#9776;</span>
+                </li>
+                <li class="rank-item" draggable="true" data-committee="Maintenance">
+                    <span class="rank-number"></span>
+                    <span>Maintenance</span>
+                    <span class="drag-handle">&#9776;</span>
+                </li>
                 <li class="rank-item" draggable="true" data-committee="Bathroom">
                     <span class="rank-number"></span>
                     <span>Bathroom Cleaning</span>
-                    <span class="drag-handle">&#9776;</span>
-                </li>
-                <li class="rank-item" draggable="true" data-committee="Meat Processing & Lifting">
-                    <span class="rank-number"></span>
-                    <span>Meat Processing & Lifting</span>
                     <span class="drag-handle">&#9776;</span>
                 </li>
             </ul>
